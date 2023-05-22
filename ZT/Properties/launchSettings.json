@@ -2,7 +2,7 @@
   "profiles": {
     "ZT": {
       "commandName": "Project",
-      "commandLineArgs": "-get id:1"
+      "commandLineArgs": "-getall"
     }
   }
 }

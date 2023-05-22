@@ -124,7 +124,6 @@ namespace ZT
             }
             return input;
         }
-        
         static void Main(string[] args)
         {
             bool working = true;
@@ -291,14 +290,12 @@ namespace ZT
             }
         }
     }
-
     class Employee
     {
         public int Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public decimal SalaryPerHour { get; set; }
-
         public Employee(string name, string surname, decimal salary)
         {
             FirstName = name;
