@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ZT": {
+      "commandName": "Project",
+      "commandLineArgs": "-get id:1"
+    }
+  }
+}

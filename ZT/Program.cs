@@ -139,155 +139,155 @@ namespace ZT
             string allCommands = "\n '-getall' - Show all \n '-add' - Add new \n '-delete' - Delete by Id \n '-update' - Update by Id \n '-clear' - Clear file \n '-end' - End program \n";
             Console.WriteLine("Welcome to console application that processes a text file containing a list of employees in JSON format\nFor list of commands enter '-help'.");
             Console.WriteLine("File used: " + filePath);
-            while (working)
+            string input = "";
+            for (int i = 0; i < args.Length; i++) 
             {
-                Console.WriteLine("\nPlease enter command:\n");
-                string input = Console.ReadLine();             
-                var spaceIndex = input.IndexOf(" ");
-                string inputCommand;
-                string inputValue;
-                Dictionary<string, string> commandValues = new Dictionary<string, string>();
-                try
-                {
-                    inputCommand = input.Substring(0, spaceIndex).ToLower();
-                    inputValue = input.Substring(spaceIndex + 1);
-                    commandValues = inputValue.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
-                        .Select(part => part.Split(':'))
-                        .ToDictionary(split => split[0], split => split[1]);
-                    commandValues = commandValues.ToDictionary(k => k.Key.ToLower(), k => k.Value);
+                input = input + args[i].ToString() + " ";
+            }
+            var spaceIndex = input.IndexOf(" ");
+            string inputCommand;
+            string inputValue;
+            Dictionary<string, string> commandValues = new Dictionary<string, string>();
+            try
+            {
+                inputCommand = input.Substring(0, spaceIndex).ToLower();
+                inputValue = input.Substring(spaceIndex + 1);
+                commandValues = inputValue.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(part => part.Split(':'))
+                    .ToDictionary(split => split[0], split => split[1]);
+                commandValues = commandValues.ToDictionary(k => k.Key.ToLower(), k => k.Value);
 
-                }
-                catch (Exception)
-                {
-                    inputCommand = input.ToLower();
-                    inputValue = "";
-                }
-                switch (inputCommand)
-                {
-                    case "-help":
+            }
+            catch (Exception)
+            {
+                inputCommand = input.ToLower();
+                inputValue = "";
+            }
+            switch (inputCommand)
+            {
+                case "-help":
+                    {
+                        Console.WriteLine(allCommands);
+                        break;
+                    }
+                case "-getall":
+                    {
+                        var employees = getAll();
+                        if (employees.Count == 0)
                         {
-                            Console.WriteLine(allCommands);
-                            break;
+                            Console.WriteLine("Empty for now...\n");
                         }
-                    case "-getall":
+                        Console.WriteLine("Current employees:\n_______");
+                        foreach (Employee employee in employees)
                         {
-                            var employees = getAll();
-                            if (employees.Count == 0)
-                            {
-                                Console.WriteLine("Empty for now...\n");
-                            }
-                            Console.WriteLine("Current employees:\n_______");
-                            foreach (Employee employee in employees)
-                            {
-                                Console.WriteLine($"{employee}");
-                            }
-                            Console.WriteLine("_______");
-                            break;
+                            Console.WriteLine($"{employee}");
                         }
-                    case "-add":
+                        Console.WriteLine("_______");
+                        break;
+                    }
+                case "-add":
+                    {
+                        try
                         {
+                            if (commandValues["firstname"] == null || commandValues["lastname"] == null || commandValues["salary"] == null)
+                            {
+                                Console.WriteLine("Wrong or insufficient data for -add command.");
+                            }
+                            else
+                            {
+                                Employee newEmployee = new Employee(commandValues["firstname"], commandValues["lastname"], Convert.ToDecimal(commandValues["salary"]));
+                                saveToJson(newEmployee);
+                                Console.WriteLine("\nNew employee added.\n");
+                            }
+                        }
+                        catch (Exception) 
+                            {
+                            Console.WriteLine("Wrong command.");
+                            }
+                        break;
+                    }
+                case "-delete":
+                    {
+                        if (commandValues["id"] != null)
+                        {
+                            int id;
+                            int lastId = getLastId();
                             try
                             {
-                                if (commandValues["firstname"] == null || commandValues["lastname"] == null || commandValues["salary"] == null)
-                                {
-                                    Console.WriteLine("Wrong or insufficient data for -add command.");
-                                }
-                                else
-                                {
-                                    Employee newEmployee = new Employee(commandValues["firstname"], commandValues["lastname"], Convert.ToDecimal(commandValues["salary"]));
-                                    saveToJson(newEmployee);
-                                    Console.WriteLine("\nNew employee added.\n");
-                                }
+                                id = int.Parse(commandValues["id"]);
                             }
-                            catch (Exception) 
-                                {
-                                Console.WriteLine("Wrong command.");
-                                }
-                            break;
-                        }
-                    case "-delete":
-                        {
-                            if (commandValues["id"] != null)
-                            {
-                                int id;
-                                int lastId = getLastId();
-                                try
-                                {
-                                    id = int.Parse(commandValues["id"]);
-                                }
-                                catch (FormatException)
-                                {
-                                    Console.WriteLine("Correct ID needed for this command.");
-                                    break;
-                                }
-                                if (id == 0 || id > lastId)
-                                {
-                                    Console.WriteLine("Wrong Id.");
-                                }
-                                else
-                                {
-                                    deleteById(id);
-                                }
-                            }
-                            else
+                            catch (FormatException)
                             {
                                 Console.WriteLine("Correct ID needed for this command.");
+                                break;
                             }
-                            break;
-                        }
-                    case "-get":
-                        {
-                            if (commandValues["id"] != null)
+                            if (id == 0 || id > lastId)
                             {
-                                int id = int.Parse(commandValues["id"]);
-                                int lastId = getLastId();
-                                if (id == 0 || id > lastId)
-                                {
-                                    Console.WriteLine("Wrong Id.");
-                                }
-                                else
-                                {
-                                    getById(id);
-                                }
+                                Console.WriteLine("Wrong Id.");
                             }
                             else
                             {
-                                Console.WriteLine("ID needed for this command.");
-                            }                                              
-                            break;
+                                deleteById(id);
+                            }
                         }
-                    case "-update":
+                        else
                         {
+                            Console.WriteLine("Correct ID needed for this command.");
+                        }
+                        break;
+                    }
+                case "-get":
+                    {
+                        if (commandValues["id"] != null)
+                        {
+                            int id = int.Parse(commandValues["id"]);
                             int lastId = getLastId();
-                            if (commandValues["id"] != null && int.Parse(commandValues["id"]) <= lastId)
+                            if (id == 0 || id > lastId)
                             {
-                                string newId = commandValues["id"];
-                                int id = GetIntFromString(newId);
-                                updateById(commandValues);
+                                Console.WriteLine("Wrong Id.");
                             }
                             else
                             {
-                                Console.WriteLine("Correct ID needed for this command.");
+                                getById(id);
                             }
-                            break;
                         }
-                    case "-clear":
+                        else
                         {
-                            deleteAll();
-                            break;
-                        }
-                    case "-end":
+                            Console.WriteLine("ID needed for this command.");
+                        }                                              
+                        break;
+                    }
+                case "-update":
+                    {
+                        int lastId = getLastId();
+                        if (commandValues["id"] != null && int.Parse(commandValues["id"]) <= lastId)
                         {
-                            working = false;
-                            Console.WriteLine("\nProgram ended. Thanks for your time.\nCreated by Savchuk Denis.");
-                            break;
+                            string newId = commandValues["id"];
+                            int id = GetIntFromString(newId);
+                            updateById(commandValues);
                         }
-                    default:
+                        else
                         {
-                            Console.WriteLine("Wrong command");
-                            break;
+                            Console.WriteLine("Correct ID needed for this command.");
                         }
-                }
+                        break;
+                    }
+                case "-clear":
+                    {
+                        deleteAll();
+                        break;
+                    }
+                case "-end":
+                    {
+                        working = false;
+                        Console.WriteLine("\nProgram ended. Thanks for your time.\nCreated by Savchuk Denis.");
+                        break;
+                    }
+                default:
+                    {
+                        Console.WriteLine("Wrong command");
+                        break;
+                    }
             }
         }
     }
